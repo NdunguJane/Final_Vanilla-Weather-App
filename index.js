@@ -1,16 +1,16 @@
 let apiKey = "28t4boad8ba39864f1579209a00b107e";
 
 const cityTimeZones = {
-  Nairobi: "Kenya/Nairobi",
-  Paris: "France/Paris",
-  Lisbon: "Portugal/Lisbon",
-  London: "England/London",
+  Nairobi: "Africa/Nairobi",
+  Paris: "Europe/Paris",
+  Lisbon: "Europe/Lisbon",
+  London: "Europe/London",
 };
 
-function formatDate(timeZone) {
-  let now = new Date();
+function formatDate(timestamp, timezone) {
+  let localDate = new Date((timestamp + timezone) * 1000);
 
-  let options = {
+  return localDate.toLocaleString("en-US", {
     weekday: "long",
     month: "long",
     day: "numeric",
@@ -18,29 +18,30 @@ function formatDate(timeZone) {
     hour: "2-digit",
     minute: "2-digit",
     hour12: true,
-  };
+    timeZone: "UTC",
+  });
+}
 
-  if (timeZone) {
-    options.timeZone = timeZone;
+if (timeZone) {
+  options.timeZone = timeZone;
+}
+
+return now.toLocaleString("en-US", options);
+{
+  function formatDay(timestamp) {
+    let date = new Date(timestamp * 1000);
+
+    let days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+    return days[date.getDay()];
   }
 
-  return now.toLocaleString("en-US", options);
-}
+  function displayForecast(response) {
+    let forecastHTML = "";
 
-function formatDay(timestamp) {
-  let date = new Date(timestamp * 1000);
-
-  let days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-
-  return days[date.getDay()];
-}
-
-function displayForecast(response) {
-  let forecastHTML = "";
-
-  response.data.daily.forEach(function (day, index) {
-    if (index < 7) {
-      forecastHTML += `
+    response.data.daily.forEach(function (day, index) {
+      if (index < 7) {
+        forecastHTML += `
         <div class="forecast-day">
 
           <div class="forecast-date">
@@ -65,68 +66,72 @@ function displayForecast(response) {
 
         </div>
       `;
-    }
-  });
+      }
+    });
 
-  document.querySelector("#forecast").innerHTML = forecastHTML;
-}
+    document.querySelector("#forecast").innerHTML = forecastHTML;
+  }
 
-function getForecast(city) {
-  let apiUrl = `https://api.shecodes.io/weather/v1/forecast?query=${city}&key=${apiKey}&units=metric`;
+  function getForecast(city) {
+    let apiUrl = `https://api.shecodes.io/weather/v1/forecast?query=${city}&key=${apiKey}&units=metric`;
 
-  axios.get(apiUrl).then(displayForecast);
-}
+    axios.get(apiUrl).then(displayForecast);
+  }
 
-function displayWeather(response) {
-  let city = response.data.city;
+  function displayWeather(response) {
+    let city = response.data.city;
 
-  document.querySelector("#city-name").innerHTML = city;
+    document.querySelector("#city-name").innerHTML = city;
 
-  document.querySelector("#temperature").innerHTML = Math.round(
-    response.data.temperature.current,
-  );
+    document.querySelector("#temperature").innerHTML = Math.round(
+      response.data.temperature.current,
+    );
 
-  document.querySelector("#description").innerHTML =
-    response.data.condition.description;
+    document.querySelector("#description").innerHTML =
+      response.data.condition.description;
 
-  document.querySelector("#humidity").innerHTML =
-    response.data.temperature.humidity;
+    document.querySelector("#humidity").innerHTML =
+      response.data.temperature.humidity;
 
-  document.querySelector("#wind-speed").innerHTML = Math.round(
-    response.data.wind.speed,
-  );
+    document.querySelector("#wind-speed").innerHTML = Math.round(
+      response.data.wind.speed,
+    );
 
-  document.querySelector("#feels-like").innerHTML = Math.round(
-    response.data.temperature.feels_like,
-  );
+    document.querySelector("#feels-like").innerHTML = Math.round(
+      response.data.temperature.feels_like,
+    );
 
-  document.querySelector("#weather-icon").innerHTML = `
+    document.querySelector("#weather-icon").innerHTML = `
     <img
       src="${response.data.condition.icon_url}"
       alt="${response.data.condition.description}"
     />
   `;
 
-  let timeZone = cityTimeZones[city];
+    let timeZone = cityTimeZones[city];
 
-  document.querySelector("#current-date-time").innerHTML = formatDate(timeZone);
-  getForecast(city);
+    document.querySelector("#current-date-time").innerHTML = formatDate(
+      response.data.time,
+      response.data.timezone,
+    );
+    getForecast(city);
+  }
+  function searchCity(city) {
+    let apiUrl = `https://api.shecodes.io/weather/v1/current?query=${city}&key=${apiKey}&units=metric`;
+
+    axios.get(apiUrl).then(displayWeather);
+  }
+
+  function handleSearch(event) {
+    event.preventDefault();
+
+    let cityInput = document.querySelector("#city-input");
+
+    searchCity(cityInput.value);
+  }
+
+  let searchForm = document.querySelector("#search-form");
+
+  searchForm.addEventListener("submit", handleSearch);
+  searchCity("Nairobi");
 }
-function searchCity(city) {
-  let apiUrl = `https://api.shecodes.io/weather/v1/current?query=${city}&key=${apiKey}&units=metric`;
-
-  axios.get(apiUrl).then(displayWeather);
-}
-
-function handleSearch(event) {
-  event.preventDefault();
-
-  let cityInput = document.querySelector("#city-input");
-
-  searchCity(cityInput.value);
-}
-
-let searchForm = document.querySelector("#search-form");
-
-searchForm.addEventListener("submit", handleSearch);
-searchCity("Nairobi");
