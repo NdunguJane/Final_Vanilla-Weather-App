@@ -110,23 +110,47 @@ button:hover {
 .forecast {
   display: flex;
   justify-content: space-between;
-  margin-top: 30px;
+  margin-top: 35px;
+  gap: 10px;
 }
 
 .forecast-day {
-  background: white;
+  flex: 1;
+  background: #ffffff;
+  border-radius: 18px;
   padding: 15px;
-  border-radius: 20px;
   text-align: center;
-  width: 90px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
 }
 
 .forecast-day img {
   width: 50px;
 }
 
-.forecast-temp {
+.forecast-temperatures {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.forecast-date {
+  font-weight: 600;
   color: #304e9a;
+  margin-bottom: 8px;
+}
+
+.forecast-icon {
+  width: 55px;
+}
+
+.forecast-max {
+  font-weight: 700;
+  color: #304e9a;
+}
+
+.forecast-min {
+  color: #888;
 }
 
 footer {
